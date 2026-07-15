@@ -1,0 +1,86 @@
+---
+import '../styles/global.css';
+import SEO from '../components/SEO.astro';
+import JsonLd from '../components/JsonLd.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import { site } from '../config/site';
+import { buildEntityGraph, type JsonLd as JsonLdType } from '../lib/schema/jsonld';
+import type { SeoProps } from '../lib/seo';
+
+type Props = SeoProps & {
+  /** Extra JSON-LD nodes merged into @graph (page-specific). */
+  jsonLd?: JsonLdType[];
+};
+
+const { jsonLd = [], ...seoProps } = Astro.props;
+const pathname = Astro.url.pathname;
+const entityGraph = buildEntityGraph();
+const graphNodes = [
+  ...((entityGraph['@graph'] as JsonLdType[]) ?? []),
+  ...jsonLd,
+];
+const documentLd = {
+  '@context': 'https://schema.org',
+  '@graph': graphNodes,
+};
+---
+
+<!doctype html>
+<html lang={site.language} data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <!-- Google Tag Manager -->
+    <script is:inline>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != 'dataLayer' ? '&l=' + l : '';
+        j.async = true;
+        j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, 'script', 'dataLayer', 'GTM-WVFQ3DT6');
+    </script>
+    <!-- End Google Tag Manager -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/jpeg" href="/favicon.jpg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+    <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+    <SEO {...seoProps} />
+    <JsonLd data={documentLd} />
+    <script is:inline>
+      (function () {
+        try {
+          var key = 'barbu-theme';
+          var stored = localStorage.getItem(key);
+          var theme =
+            stored === 'light' || stored === 'dark' ? stored : 'dark';
+          document.documentElement.dataset.theme = theme;
+          document.documentElement.style.colorScheme = theme;
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript>
+      <iframe
+        src={`https://www.googletagmanager.com/ns.html?id=${site.gtmId}`}
+        height="0"
+        width="0"
+        style="display:none;visibility:hidden"
+        title="Google Tag Manager"></iframe>
+    </noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    <a class="skip-link" href="#main">Skip to content</a>
+    <SiteHeader currentPath={pathname} />
+    <main id="main" class="site-main site-shell">
+      <slot />
+    </main>
+    <SiteFooter />
+  </body>
+</html>

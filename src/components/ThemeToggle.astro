@@ -1,0 +1,70 @@
+---
+/**
+ * Theme toggle — mono label, no decorative icons.
+ */
+---
+
+<button
+  type="button"
+  class="theme-toggle"
+  data-theme-toggle
+  aria-label="Toggle color theme"
+>
+  <span data-theme-label>theme</span>
+</button>
+
+<script>
+  const storageKey = 'barbu-theme';
+
+  type Theme = 'light' | 'dark';
+
+  function appliedTheme(): Theme {
+    const stored = localStorage.getItem(storageKey);
+    if (stored === 'light' || stored === 'dark') return stored;
+    return 'dark';
+  }
+
+  function applyTheme(theme: Theme) {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+    document.querySelectorAll('[data-theme-label]').forEach((el) => {
+      el.textContent = theme === 'dark' ? 'light' : 'dark';
+    });
+  }
+
+  function init() {
+    applyTheme(appliedTheme());
+
+    document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const next: Theme = appliedTheme() === 'dark' ? 'light' : 'dark';
+        localStorage.setItem(storageKey, next);
+        applyTheme(next);
+      });
+    });
+  }
+
+  init();
+  document.addEventListener('astro:after-swap', init);
+</script>
+
+<style>
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 1.75rem;
+    padding: 0 var(--space-2);
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    background: transparent;
+    color: var(--color-muted);
+    border: 1px solid var(--color-border);
+  }
+
+  .theme-toggle:hover {
+    color: var(--color-fg);
+    border-color: var(--color-border-strong);
+  }
+</style>

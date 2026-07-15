@@ -1,0 +1,84 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Button from '../components/Button.astro';
+import Prose from '../components/Prose.astro';
+import TextLink from '../components/TextLink.astro';
+import { getPageByPath } from '../lib/content';
+import { buildBreadcrumbJsonLd, buildWebPageJsonLd } from '../lib/schema/jsonld';
+import { resolveUrl } from '../lib/seo';
+import { external } from '../config/site';
+import { person } from '../config/person';
+
+const entry = await getPageByPath('/contact');
+if (!entry) throw new Error('Missing content/pages entry for /contact');
+
+const { Content } = await render(entry);
+const url = resolveUrl('/contact');
+const pageLd = buildWebPageJsonLd({
+  url,
+  name: entry.data.title,
+  description: entry.data.description,
+  type: entry.data.schemaType,
+});
+const crumbs = buildBreadcrumbJsonLd([
+  { name: 'Home', url: resolveUrl('/') },
+  { name: entry.data.title, url },
+]);
+---
+
+<BaseLayout
+  title={entry.data.title}
+  description={entry.data.description}
+  path="/contact"
+  jsonLd={[pageLd, crumbs]}
+>
+  <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: entry.data.title }]} />
+
+  <header class="page-header">
+    <h1>{entry.data.title}</h1>
+    <p>{entry.data.description}</p>
+  </header>
+
+  {
+    entry.data.draft && (
+      <p class="placeholder-note" style="margin-bottom: var(--space-8)">
+        IA placeholder (draft). Confirm contact channels in Milestone 4. Do not invent an email.
+      </p>
+    )
+  }
+
+  <Prose>
+    <section class="contact-reach" aria-labelledby="contact-reach-title">
+      <h2 id="contact-reach-title">How do I reach George Barbu?</h2>
+      <p>
+        Email: <TextLink href={`mailto:${person.email}`}>{person.email}</TextLink>
+      </p>
+      <p>Book a call:</p>
+      <div class="contact-ctas">
+        <Button href={external.calendarBook30} variant="primary" external>
+          Book 30 min
+        </Button>
+        <Button href={external.calendarBook60} variant="secondary" external>
+          Book 60 min
+        </Button>
+      </div>
+    </section>
+
+    <Content />
+  </Prose>
+</BaseLayout>
+
+<style>
+  .contact-reach h2 {
+    margin-top: 0;
+  }
+
+  .contact-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin: 0 0 1.75em;
+  }
+</style>

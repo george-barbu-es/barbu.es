@@ -1,0 +1,86 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Prose from '../../components/Prose.astro';
+import {
+  buildArticleJsonLd,
+  buildBreadcrumbJsonLd,
+  buildWebPageJsonLd,
+} from '../../lib/schema/jsonld';
+import { resolveUrl } from '../../lib/seo';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('writing');
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const url = resolveUrl(`/writing/${entry.id}`);
+const pageLd = buildWebPageJsonLd({
+  url,
+  name: entry.data.title,
+  description: entry.data.description,
+});
+const articleLd = buildArticleJsonLd({
+  url,
+  headline: entry.data.title,
+  description: entry.data.description,
+  datePublished: entry.data.pubDate.toISOString(),
+  dateModified: (entry.data.updatedDate ?? entry.data.pubDate).toISOString(),
+});
+const crumbs = buildBreadcrumbJsonLd([
+  { name: 'Home', url: resolveUrl('/') },
+  { name: 'Writing', url: resolveUrl('/writing') },
+  { name: entry.data.title, url },
+]);
+---
+
+<BaseLayout
+  title={entry.data.title}
+  description={entry.data.description}
+  path={`/writing/${entry.id}`}
+  type="article"
+  noindex={entry.data.draft}
+  jsonLd={[pageLd, articleLd, crumbs]}
+>
+  <Breadcrumbs
+    items={[
+      { label: 'Home', href: '/' },
+      { label: 'Writing', href: '/writing/' },
+      { label: entry.data.title },
+    ]}
+  />
+
+  <article>
+    {
+      entry.data.draft && (
+        <p class="placeholder-note" style="margin-bottom: var(--space-8)">
+          Draft Cornerstone scaffold. Not factual launch content.
+        </p>
+      )
+    }
+    <header class="page-header">
+      {
+        entry.data.cornerstone && (
+          <p style="margin: 0 0 var(--space-3); font-size: var(--text-xs); letter-spacing: var(--tracking-wide); text-transform: uppercase; color: var(--color-muted); font-weight: 600;">
+            Cornerstone
+          </p>
+        )
+      }
+      <h1>{entry.data.title}</h1>
+      <p>
+        <time datetime={entry.data.pubDate.toISOString()}>
+          {entry.data.pubDate.toISOString().slice(0, 10)}
+        </time>
+      </p>
+    </header>
+    <Prose>
+      <Content />
+    </Prose>
+  </article>
+</BaseLayout>

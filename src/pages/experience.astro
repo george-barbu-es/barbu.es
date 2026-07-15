@@ -1,0 +1,52 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Prose from '../components/Prose.astro';
+import { getPageByPath } from '../lib/content';
+import { buildBreadcrumbJsonLd, buildWebPageJsonLd } from '../lib/schema/jsonld';
+import { resolveUrl } from '../lib/seo';
+
+const entry = await getPageByPath('/experience');
+if (!entry) throw new Error('Missing content/pages entry for /experience');
+
+const { Content } = await render(entry);
+const url = resolveUrl('/experience');
+const pageLd = buildWebPageJsonLd({
+  url,
+  name: entry.data.title,
+  description: entry.data.description,
+  type: entry.data.schemaType,
+});
+const crumbs = buildBreadcrumbJsonLd([
+  { name: 'Home', url: resolveUrl('/') },
+  { name: entry.data.title, url },
+]);
+---
+
+<BaseLayout
+  title={entry.data.title}
+  description={entry.data.description}
+  path="/experience"
+  type="profile"
+  jsonLd={[pageLd, crumbs]}
+>
+  <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: entry.data.title }]} />
+
+  <header class="page-header">
+    <h1>{entry.data.title}</h1>
+    <p>{entry.data.description}</p>
+  </header>
+
+  {
+    entry.data.draft && (
+      <p class="placeholder-note" style="margin-bottom: var(--space-8)">
+        IA placeholder (draft). Executive narrative in Milestone 4. Resume stays on george.barbu.es.
+      </p>
+    )
+  }
+
+  <Prose>
+    <Content />
+  </Prose>
+</BaseLayout>

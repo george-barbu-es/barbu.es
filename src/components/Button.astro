@@ -1,0 +1,80 @@
+---
+/**
+ * Primary button / text-link — sharp, mono-friendly.
+ */
+import { withTrailingSlash } from '../lib/seo';
+
+type Props = {
+  href: string;
+  variant?: 'primary' | 'secondary' | 'text';
+  external?: boolean;
+  class?: string;
+};
+
+const { href, variant = 'primary', external = false, class: className } = Astro.props;
+const to = external ? href : withTrailingSlash(href);
+const classes = ['btn', `btn--${variant}`, className].filter(Boolean).join(' ');
+---
+
+<a
+  class={classes}
+  href={to}
+  rel={external ? 'noopener noreferrer' : undefined}
+  target={external ? '_blank' : undefined}
+>
+  <slot />
+</a>
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    line-height: 1;
+    text-decoration: none;
+    transition:
+      background var(--duration-fast) var(--ease-out),
+      color var(--duration-fast) var(--ease-out),
+      border-color var(--duration-fast) var(--ease-out);
+  }
+
+  .btn--primary {
+    background: var(--color-fg);
+    color: var(--color-bg);
+    border: 1px solid var(--color-fg);
+    padding: 0.65rem 0.9rem;
+  }
+
+  .btn--primary:hover {
+    background: transparent;
+    color: var(--color-fg);
+  }
+
+  .btn--secondary {
+    background: transparent;
+    color: var(--color-fg);
+    border: 1px solid var(--color-border-strong);
+    padding: 0.65rem 0.9rem;
+  }
+
+  .btn--secondary:hover {
+    border-color: var(--color-fg);
+  }
+
+  .btn--text {
+    background: none;
+    border: 0;
+    color: var(--color-accent);
+    padding: 0;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
+  .btn--text:hover {
+    color: var(--color-accent-hover);
+  }
+</style>

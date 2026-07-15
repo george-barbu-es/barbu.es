@@ -1,0 +1,143 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import Button from '../components/Button.astro';
+import TextLink from '../components/TextLink.astro';
+import { buildWebPageJsonLd } from '../lib/schema/jsonld';
+import { site, external } from '../config/site';
+import { person } from '../config/person';
+import { resolveUrl } from '../lib/seo';
+
+const pageLd = buildWebPageJsonLd({
+  url: resolveUrl('/'),
+  name: site.name,
+  description: site.description,
+  type: 'WebPage',
+  mainEntityPerson: true,
+});
+
+const links = [
+  { href: '/about/', path: 'about/', desc: 'who I am, principles, entity clarity' },
+  { href: '/work/', path: 'work/', desc: 'selected work worth citing' },
+  { href: '/experience/', path: 'experience/', desc: 'career narrative and outcomes' },
+  { href: '/writing/', path: 'writing/', desc: 'how I think, Cornerstones' },
+  { href: '/contact/', path: 'contact/', desc: 'reach me directly' },
+  { href: '/now/', path: 'now/', desc: 'what I am focused on now' },
+];
+---
+
+<BaseLayout title={site.name} description={site.description} path="/" jsonLd={[pageLd]}>
+  <Hero
+    title="Founder of InfoWebPlus, Frontend Platform Lead, Architecture & AI"
+    lede={`${person.name}. Spain, EU remote. Canonical Knowledge Platform for who I am: foundations first, facts over theater, built for humans and AI systems.`}
+    primaryCta={{ href: '/about/', label: 'about' }}
+    secondaryCta={{
+      href: '/writing/founder-how-i-think/',
+      label: 'cornerstone',
+    }}
+  />
+
+  <section class="home-index" aria-labelledby="index-title">
+    <h2 id="index-title" class="home-index__title">Where should you start?</h2>
+    <ul class="home-index__list">
+      {
+        links.map((item) => (
+          <li>
+            <a href={item.href} class="home-index__link">
+              <code class="home-index__path">{item.path}</code>
+              <span class="home-index__desc">{item.desc}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="home-index__ctas">
+      <Button href={external.resume} variant="secondary" external>resume</Button>
+      <Button href={external.portfolio} variant="secondary" external>portfolio</Button>
+    </div>
+
+    <p class="home-index__quiet">
+      company: <TextLink href={external.company} external>infowebplus.com</TextLink>
+    </p>
+  </section>
+</BaseLayout>
+
+<style>
+  .home-index {
+    margin-top: var(--space-12);
+    padding-top: var(--space-8);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .home-index__title {
+    margin: 0 0 var(--space-5);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--color-muted);
+  }
+
+  .home-index__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .home-index__list li {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .home-index__link {
+    display: grid;
+    grid-template-columns: 9rem 1fr;
+    gap: var(--space-4);
+    align-items: baseline;
+    padding-block: var(--space-3);
+    text-decoration: none;
+    color: inherit;
+  }
+
+  @media (max-width: 520px) {
+    .home-index__link {
+      grid-template-columns: 1fr;
+      gap: var(--space-1);
+    }
+  }
+
+  .home-index__path {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--color-accent);
+    background: none;
+    border: 0;
+    padding: 0;
+  }
+
+  .home-index__link:hover .home-index__path {
+    text-decoration: underline;
+  }
+
+  .home-index__desc {
+    color: var(--color-muted);
+    font-size: var(--text-sm);
+  }
+
+  .home-index__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-8);
+  }
+
+  .home-index__quiet {
+    margin: var(--space-6) 0 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+  }
+</style>

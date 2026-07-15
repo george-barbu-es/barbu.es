@@ -1,0 +1,11 @@
+---
+import { toJsonLdScript, type JsonLd } from '../lib/schema/jsonld';
+
+type Props = {
+  data: JsonLd;
+};
+
+const { data } = Astro.props;
+---
+
+<script is:inline type="application/ld+json" set:html={toJsonLdScript(data)} />

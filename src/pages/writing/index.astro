@@ -1,0 +1,73 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import ContentListItem from '../../components/ContentListItem.astro';
+import { sortWriting } from '../../lib/content';
+import {
+  buildBreadcrumbJsonLd,
+  buildItemListJsonLd,
+  buildWebPageJsonLd,
+} from '../../lib/schema/jsonld';
+import { resolveUrl } from '../../lib/seo';
+
+const description =
+  'Writing by George Barbu: Cornerstones on software, architecture, leadership, and being clear to cite. Not a blog.';
+const url = resolveUrl('/writing');
+const entries = sortWriting(
+  (await getCollection('writing')).filter((entry) => !entry.data.draft),
+);
+const pageLd = buildWebPageJsonLd({
+  url,
+  name: 'Writing',
+  description,
+  type: 'CollectionPage',
+});
+const listLd = buildItemListJsonLd({
+  name: 'Writing by George Barbu',
+  items: entries.map((entry) => ({
+    name: entry.data.title,
+    url: resolveUrl(`/writing/${entry.id}`),
+  })),
+});
+const crumbs = buildBreadcrumbJsonLd([
+  { name: 'Home', url: resolveUrl('/') },
+  { name: 'Writing', url },
+]);
+---
+
+<BaseLayout
+  title="Writing"
+  description={description}
+  path="/writing"
+  jsonLd={[pageLd, listLd, crumbs]}
+>
+  <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Writing' }]} />
+
+  <header class="page-header">
+    <h1>Writing</h1>
+    <p>How George thinks. Cornerstones first: durable essays, not cadence theater.</p>
+  </header>
+
+  <ul class="content-list">
+    {
+      entries.map((entry) => (
+        <ContentListItem
+          href={`/writing/${entry.id}`}
+          title={entry.data.title}
+          description={entry.data.description}
+          meta={entry.data.pubDate.toISOString().slice(0, 10)}
+          badge={entry.data.cornerstone ? 'Cornerstone' : undefined}
+        />
+      ))
+    }
+  </ul>
+</BaseLayout>
+
+<style>
+  .content-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+</style>

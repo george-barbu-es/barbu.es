@@ -1,0 +1,54 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Prose from '../components/Prose.astro';
+import { buildBreadcrumbJsonLd, buildWebPageJsonLd } from '../lib/schema/jsonld';
+import { resolveUrl } from '../lib/seo';
+
+const entries = await getCollection('now');
+const entry = entries.sort(
+  (a, b) => b.data.updatedDate.valueOf() - a.data.updatedDate.valueOf(),
+)[0];
+
+if (!entry) {
+  throw new Error('Missing src/content/now entry. Add current.mdx');
+}
+
+const { Content } = await render(entry);
+const description = entry.data.description;
+const url = resolveUrl('/now');
+const pageLd = buildWebPageJsonLd({
+  url,
+  name: entry.data.title,
+  description,
+  type: 'WebPage',
+});
+const crumbs = buildBreadcrumbJsonLd([
+  { name: 'Home', url: resolveUrl('/') },
+  { name: entry.data.title, url },
+]);
+---
+
+<BaseLayout
+  title={entry.data.title}
+  description={description}
+  path="/now"
+  jsonLd={[pageLd, crumbs]}
+>
+  <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: entry.data.title }]} />
+
+  <header class="page-header">
+    <h1>{entry.data.title}</h1>
+    <p>
+      Current focus.
+      <time datetime={entry.data.updatedDate.toISOString()}>
+        Updated {entry.data.updatedDate.toISOString().slice(0, 10)}
+      </time>
+    </p>
+  </header>
+
+  <Prose>
+    <Content />
+  </Prose>
+</BaseLayout>

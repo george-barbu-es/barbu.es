@@ -1,0 +1,19 @@
+/* TEAM */
+Name: George Barbu
+Role: Founder of InfoWebPlus, Frontend Platform Lead
+Site: https://barbu.es
+Contact: george@barbu.es
+Location: Spain (EU Remote)
+
+/* SITE */
+Standards: HTML, CSS, Astro
+Purpose: Knowledge Platform for Person entity George Barbu (canonical, factual, clear to cite)
+Company: InfoWebPlus https://infowebplus.com (founded 2016 by George Barbu)
+Resume: https://george.barbu.es
+Portfolio archive: https://portfolio.barbu.es
+Cornerstone: https://barbu.es/writing/founder-how-i-think
+
+/* THANKS */
+Constitution: ARCHITECTURE.md
+Design: DESIGN.md
+Plan: IMPLEMENTATION_PLAN.md

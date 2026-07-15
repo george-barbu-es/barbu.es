@@ -1,0 +1,149 @@
+---
+/**
+ * Identity-first hero — programmer style.
+ * Name is the brand. Portrait is secondary, not a fashion full-bleed.
+ */
+import Button from './Button.astro';
+import { person } from '../config/person';
+
+type Props = {
+  title: string;
+  lede?: string;
+  showPortrait?: boolean;
+  portraitSrc?: string;
+  primaryCta?: { href: string; label: string };
+  secondaryCta?: { href: string; label: string; external?: boolean };
+};
+
+const {
+  title,
+  lede,
+  showPortrait = true,
+  portraitSrc = '/images/george-barbu.jpg',
+  primaryCta,
+  secondaryCta,
+} = Astro.props;
+---
+
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero__copy">
+    <p class="hero__path">~/barbu.es</p>
+    <h1 id="hero-title" class="hero__title">{person.name}</h1>
+    <p class="hero__role">{title}</p>
+    {lede && <p class="hero__lede">{lede}</p>}
+    <div class="hero__actions">
+      <slot name="actions">
+        {
+          primaryCta && (
+            <Button href={primaryCta.href} variant="primary">
+              {primaryCta.label}
+            </Button>
+          )
+        }
+        {
+          secondaryCta && (
+            <Button
+              href={secondaryCta.href}
+              variant="secondary"
+              external={secondaryCta.external}
+            >
+              {secondaryCta.label}
+            </Button>
+          )
+        }
+      </slot>
+    </div>
+  </div>
+
+  {
+    showPortrait && (
+      <div class="hero__media">
+        <img
+          class="hero__portrait"
+          src={portraitSrc}
+          alt={`Portrait of ${person.name}`}
+          width="320"
+          height="320"
+          sizes="(min-width: 800px) 240px, 160px"
+          decoding="async"
+          fetchpriority="high"
+        />
+      </div>
+    )
+  }
+</section>
+
+<style>
+  .hero {
+    display: grid;
+    gap: var(--space-8);
+    align-items: start;
+    padding-block: var(--space-2) var(--space-6);
+  }
+
+  @media (min-width: 800px) {
+    .hero {
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: var(--space-12);
+      align-items: center;
+    }
+  }
+
+  .hero__path {
+    margin: 0 0 var(--space-4);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+  }
+
+  .hero__title {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-5xl);
+    font-weight: 500;
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .hero__role {
+    margin: var(--space-4) 0 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--color-accent);
+    line-height: var(--leading-snug);
+  }
+
+  .hero__lede {
+    margin: var(--space-4) 0 0;
+    font-size: var(--text-base);
+    line-height: var(--leading-snug);
+    color: var(--color-muted);
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+  }
+
+  .hero__media {
+    width: 10rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-hero-wash);
+  }
+
+  @media (min-width: 800px) {
+    .hero__media {
+      width: 15rem;
+    }
+  }
+
+  .hero__portrait {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    object-position: center top;
+  }
+</style>

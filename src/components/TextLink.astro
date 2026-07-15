@@ -1,0 +1,31 @@
+---
+type Props = {
+  href: string;
+  external?: boolean;
+  class?: string;
+};
+
+const { href, external = false, class: className } = Astro.props;
+---
+
+<a
+  class:list={['text-link', className]}
+  href={href}
+  rel={external ? 'noopener noreferrer' : undefined}
+>
+  <slot />
+</a>
+
+<style>
+  .text-link {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+    text-decoration-thickness: 1px;
+    font-weight: 500;
+  }
+
+  .text-link:hover {
+    color: var(--color-accent-hover);
+  }
+</style>

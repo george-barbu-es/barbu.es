@@ -1,0 +1,201 @@
+---
+import ThemeToggle from './ThemeToggle.astro';
+import { navigation, site } from '../config/site';
+import { person } from '../config/person';
+
+type Props = {
+  currentPath: string;
+};
+
+const { currentPath } = Astro.props;
+
+function isCurrent(href: string): boolean {
+  const base = href.replace(/\/$/, '') || '/';
+  if (base === '/') return currentPath === '/' || currentPath === '';
+  return (
+    currentPath === href ||
+    currentPath === base ||
+    currentPath === `${base}/` ||
+    currentPath.startsWith(`${base}/`)
+  );
+}
+---
+
+<header class="site-header">
+  <div class="site-shell site-header__inner">
+    <a href="/" class="site-brand" aria-current={currentPath === '/' ? 'page' : undefined}>
+      <img
+        class="site-brand__logo"
+        src={person.logo}
+        alt=""
+        width="28"
+        height="28"
+        decoding="async"
+      />
+      <span class="site-brand__name">{site.name}</span>
+    </a>
+
+    <nav class="nav-desktop" aria-label="Primary">
+      <ul class="nav-list">
+        {
+          navigation.map((item) => (
+            <li>
+              <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+                {item.label.toLowerCase()}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="site-header__actions">
+      <ThemeToggle />
+      <details class="nav-mobile">
+        <summary class="nav-mobile__summary" aria-label="Open menu">menu</summary>
+        <nav class="nav-mobile__panel" aria-label="Primary mobile">
+          <ul class="nav-list nav-list--stack">
+            {
+              navigation.map((item) => (
+                <li>
+                  <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+                    {item.label.toLowerCase()}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    min-height: 3.25rem;
+  }
+
+  .site-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    text-decoration: none;
+    color: var(--color-fg);
+    flex-shrink: 0;
+  }
+
+  .site-brand:hover {
+    color: var(--color-fg);
+    opacity: 0.7;
+  }
+
+  .site-brand__logo {
+    width: 1.5rem;
+    height: 1.5rem;
+    object-fit: cover;
+    border: 1px solid var(--color-border);
+  }
+
+  .site-brand__name {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 500;
+  }
+
+  .nav-desktop {
+    display: none;
+    margin-left: var(--space-2);
+  }
+
+  @media (min-width: 720px) {
+    .nav-desktop {
+      display: block;
+    }
+
+    .nav-mobile {
+      display: none;
+    }
+  }
+
+  .nav-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1) var(--space-3);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .nav-list a {
+    text-decoration: none;
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 400;
+    padding-block: var(--space-1);
+  }
+
+  .nav-list a:hover,
+  .nav-list a[aria-current='page'] {
+    color: var(--color-fg);
+  }
+
+  .nav-list a[aria-current='page'] {
+    color: var(--color-accent);
+  }
+
+  .site-header__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-left: auto;
+  }
+
+  .nav-mobile {
+    position: relative;
+  }
+
+  .nav-mobile__summary {
+    list-style: none;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    padding: var(--space-1) var(--space-2);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    color: var(--color-fg);
+  }
+
+  .nav-mobile__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .nav-mobile__panel {
+    position: absolute;
+    right: 0;
+    top: calc(100% + var(--space-2));
+    min-width: 11rem;
+    padding: var(--space-3);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+  }
+
+  .nav-list--stack {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+</style>

@@ -1,0 +1,120 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Prose from '../../components/Prose.astro';
+import {
+  buildBreadcrumbJsonLd,
+  buildCreativeWorkJsonLd,
+  buildWebPageJsonLd,
+} from '../../lib/schema/jsonld';
+import { resolveUrl } from '../../lib/seo';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('work');
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const url = resolveUrl(`/work/${entry.id}`);
+const pageLd = buildWebPageJsonLd({
+  url,
+  name: entry.data.title,
+  description: entry.data.description,
+});
+const workLd = buildCreativeWorkJsonLd({
+  url,
+  name: entry.data.title,
+  description: entry.data.description,
+  schemaType: entry.data.schemaType,
+  credit: entry.data.credit,
+  aboutInfoWebPlus: entry.data.aboutInfoWebPlus,
+  relatedUrl: entry.data.relatedUrl,
+});
+const crumbs = buildBreadcrumbJsonLd([
+  { name: 'Home', url: resolveUrl('/') },
+  { name: 'Work', url: resolveUrl('/work') },
+  { name: entry.data.title, url },
+]);
+---
+
+<BaseLayout
+  title={entry.data.title}
+  description={entry.data.description}
+  path={`/work/${entry.id}`}
+  noindex={entry.data.draft}
+  jsonLd={[pageLd, workLd, crumbs]}
+>
+  <Breadcrumbs
+    items={[
+      { label: 'Home', href: '/' },
+      { label: 'Work', href: '/work/' },
+      { label: entry.data.title },
+    ]}
+  />
+
+  <article>
+    {
+      entry.data.draft && (
+        <p class="placeholder-note" style="margin-bottom: var(--space-8)">
+          Draft / placeholder. Not factual launch content.
+        </p>
+      )
+    }
+    <header class="page-header">
+      <h1>{entry.data.title}</h1>
+      <p>{entry.data.description}</p>
+    </header>
+    <Prose>
+      <dl>
+        <dt>Overview</dt>
+        <dd>{entry.data.overview}</dd>
+        <dt>Problem</dt>
+        <dd>{entry.data.problem}</dd>
+        <dt>Solution</dt>
+        <dd>{entry.data.solution}</dd>
+        <dt>Role</dt>
+        <dd>{entry.data.role}</dd>
+        <dt>Relationship with InfoWebPlus</dt>
+        <dd>{entry.data.infoWebPlusRelationship}</dd>
+        {
+          entry.data.architecture && (
+            <>
+              <dt>Architecture</dt>
+              <dd>{entry.data.architecture}</dd>
+            </>
+          )
+        }
+        {
+          entry.data.businessOutcome && (
+            <>
+              <dt>Business outcome</dt>
+              <dd>{entry.data.businessOutcome}</dd>
+            </>
+          )
+        }
+        {
+          entry.data.lessonsLearned && (
+            <>
+              <dt>Lessons learned</dt>
+              <dd>{entry.data.lessonsLearned}</dd>
+            </>
+          )
+        }
+        {
+          entry.data.technologies && entry.data.technologies.length > 0 && (
+            <>
+              <dt>Technologies</dt>
+              <dd>{entry.data.technologies.join(', ')}</dd>
+            </>
+          )
+        }
+      </dl>
+      <Content />
+    </Prose>
+  </article>
+</BaseLayout>
