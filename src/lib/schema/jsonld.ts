@@ -121,9 +121,11 @@ export function buildArticleJsonLd(options: {
   description: string;
   datePublished: string;
   dateModified?: string;
+  /** Absolute OG / social image URL when available. */
+  image?: string;
 }): JsonLd {
   const pageId = `${options.url.replace(/\/$/, '')}#webpage`;
-  return {
+  const node: JsonLd = {
     '@type': 'Article',
     '@id': `${options.url.replace(/\/$/, '')}#article`,
     headline: options.headline,
@@ -138,6 +140,12 @@ export function buildArticleJsonLd(options: {
       { '@id': entityIds.organizationInfoWebPlus },
     ],
   };
+
+  if (options.image) {
+    node.image = options.image;
+  }
+
+  return node;
 }
 
 export function buildCreativeWorkJsonLd(options: {

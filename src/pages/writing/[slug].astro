@@ -1,4 +1,6 @@
 ---
+import fs from 'node:fs';
+import path from 'node:path';
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
@@ -8,7 +10,12 @@ import {
   buildBreadcrumbJsonLd,
   buildWebPageJsonLd,
 } from '../../lib/schema/jsonld';
-import { resolveUrl } from '../../lib/seo';
+import {
+  resolveUrl,
+  WRITING_OG_IMAGE,
+  writingOgImagePath,
+  type OgImageInput,
+} from '../../lib/seo';
 
 export async function getStaticPaths() {
   const entries = await getCollection('writing');
@@ -21,6 +28,36 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const { Content } = await render(entry);
 const url = resolveUrl(`/writing/${entry.id}`);
+
+function resolveWritingOgImage(slug: string, frontmatterImage?: string): OgImageInput {
+  if (frontmatterImage) {
+    return {
+      src: frontmatterImage,
+      width: WRITING_OG_IMAGE.width,
+      height: WRITING_OG_IMAGE.height,
+      alt: entry.data.title,
+    };
+  }
+
+  const conventionPath = writingOgImagePath(slug);
+  const diskPath = path.join(process.cwd(), 'public', conventionPath.replace(/^\//, ''));
+  if (fs.existsSync(diskPath)) {
+    return {
+      src: conventionPath,
+      width: WRITING_OG_IMAGE.width,
+      height: WRITING_OG_IMAGE.height,
+      alt: entry.data.title,
+    };
+  }
+
+  return {
+    ...WRITING_OG_IMAGE,
+    alt: entry.data.title,
+  };
+}
+
+const ogImage = resolveWritingOgImage(entry.id, entry.data.image);
+
 const pageLd = buildWebPageJsonLd({
   url,
   name: entry.data.title,
@@ -32,6 +69,7 @@ const articleLd = buildArticleJsonLd({
   description: entry.data.description,
   datePublished: entry.data.pubDate.toISOString(),
   dateModified: (entry.data.updatedDate ?? entry.data.pubDate).toISOString(),
+  image: resolveUrl(ogImage.src),
 });
 const crumbs = buildBreadcrumbJsonLd([
   { name: 'Home', url: resolveUrl('/') },
@@ -45,6 +83,7 @@ const crumbs = buildBreadcrumbJsonLd([
   description={entry.data.description}
   path={`/writing/${entry.id}`}
   type="article"
+  image={ogImage}
   noindex={entry.data.draft}
   jsonLd={[pageLd, articleLd, crumbs]}
 >

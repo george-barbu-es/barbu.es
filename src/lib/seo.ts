@@ -1,11 +1,49 @@
 import { site } from '../config/site';
 
+/** LinkedIn / Open Graph preferred share image size. */
+export const OG_IMAGE_WIDTH = 1200;
+export const OG_IMAGE_HEIGHT = 630;
+
+export type OgImageInput = {
+  /** Path beginning with `/`, or absolute URL. */
+  src: string;
+  width?: number;
+  height?: number;
+  alt?: string;
+};
+
+export type ResolvedOgImage = {
+  url: string;
+  width: number;
+  height: number;
+  alt: string;
+};
+
+/** Site-wide social share fallback (1200×630, served from /public/og). */
+export const DEFAULT_OG_IMAGE: Required<OgImageInput> = {
+  src: '/og/default.jpg',
+  width: OG_IMAGE_WIDTH,
+  height: OG_IMAGE_HEIGHT,
+  alt: `${site.name} - Knowledge Platform`,
+};
+
+/** Writing share fallback when an article has no dedicated OG image. */
+export const WRITING_OG_IMAGE: Required<OgImageInput> = {
+  src: '/og/writing.jpg',
+  width: OG_IMAGE_WIDTH,
+  height: OG_IMAGE_HEIGHT,
+  alt: `Writing on ${site.name}`,
+};
+
 export type SeoProps = {
   title?: string;
   description?: string;
   /** Path beginning with `/`, or absolute URL. */
   path?: string;
-  image?: string;
+  /** Absolute URL, site path, or structured OG image. */
+  image?: string | OgImageInput;
+  /** Alt text when `image` is a bare URL/path. */
+  imageAlt?: string;
   type?: 'website' | 'article' | 'profile';
   noindex?: boolean;
 };
@@ -32,12 +70,14 @@ export function withTrailingSlash(path: string): string {
 /**
  * Canonical URLs always use a trailing slash for HTML routes
  * (matches Astro static output + sitemap). Root is `https://barbu.es/`.
+ * Asset paths that include a file extension keep their filename as-is.
  */
 export function resolveUrl(path = '/'): string {
   if (path.startsWith('http://') || path.startsWith('https://')) {
     const url = new URL(path);
-    if (!url.pathname.split('/').pop()?.includes('.')) {
-      if (!url.pathname.endsWith('/')) url.pathname = `${url.pathname}/`;
+    const leaf = url.pathname.split('/').pop() ?? '';
+    if (!leaf.includes('.') && !url.pathname.endsWith('/')) {
+      url.pathname = `${url.pathname}/`;
     }
     return url.toString();
   }
@@ -47,29 +87,71 @@ export function resolveUrl(path = '/'): string {
     return `${site.url}/`;
   }
 
+  const leaf = normalized.split('/').pop() ?? '';
+  if (leaf.includes('.')) {
+    return new URL(normalized, `${site.url}/`).toString();
+  }
+
   const withSlash = normalized.endsWith('/') ? normalized : `${normalized}/`;
   return new URL(withSlash, `${site.url}/`).toString();
 }
 
+/** Convention path for a writing article OG image in `/public/og/writing/`. */
+export function writingOgImagePath(slug: string): string {
+  return `/og/writing/${slug}.jpg`;
+}
+
+export function resolveOgImage(
+  image?: string | OgImageInput,
+  fallback: Required<OgImageInput> = DEFAULT_OG_IMAGE,
+  imageAlt?: string,
+): ResolvedOgImage {
+  if (!image) {
+    return {
+      url: resolveUrl(fallback.src),
+      width: fallback.width,
+      height: fallback.height,
+      alt: imageAlt ?? fallback.alt,
+    };
+  }
+
+  if (typeof image === 'string') {
+    return {
+      url: resolveUrl(image),
+      width: OG_IMAGE_WIDTH,
+      height: OG_IMAGE_HEIGHT,
+      alt: imageAlt ?? fallback.alt,
+    };
+  }
+
+  return {
+    url: resolveUrl(image.src),
+    width: image.width ?? OG_IMAGE_WIDTH,
+    height: image.height ?? OG_IMAGE_HEIGHT,
+    alt: image.alt ?? imageAlt ?? fallback.alt,
+  };
+}
+
 export function buildSeo(props: SeoProps = {}) {
-  const title = props.title
-    ? props.title === site.name
-      ? site.name
-      : `${props.title} · ${site.name}`
-    : site.name;
+  const pageTitle = props.title ?? site.name;
+  const documentTitle =
+    pageTitle === site.name ? site.name : `${pageTitle} · ${site.name}`;
+  /** Social title omits the site suffix — `og:site_name` already carries it. */
+  const socialTitle = pageTitle;
 
   const description = props.description ?? site.description;
   const canonical = resolveUrl(props.path ?? '/');
-  const image = props.image ?? undefined;
+  const ogImage = resolveOgImage(props.image, DEFAULT_OG_IMAGE, props.imageAlt);
   const ogType = props.type ?? 'website';
 
   return {
-    title,
+    title: documentTitle,
+    socialTitle,
     description,
     canonical,
-    image,
+    ogImage,
     ogType,
     noindex: props.noindex ?? false,
-    twitterCard: image ? 'summary_large_image' : 'summary',
+    twitterCard: 'summary_large_image' as const,
   };
 }

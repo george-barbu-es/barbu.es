@@ -9,7 +9,7 @@ import {
   buildItemListJsonLd,
   buildWebPageJsonLd,
 } from '../../lib/schema/jsonld';
-import { resolveUrl } from '../../lib/seo';
+import { resolveUrl, WRITING_OG_IMAGE } from '../../lib/seo';
 
 const description =
   'Writing by George Barbu: Cornerstones on software, architecture, leadership, and being clear to cite. Not a blog.';
@@ -40,6 +40,7 @@ const crumbs = buildBreadcrumbJsonLd([
   title="Writing"
   description={description}
   path="/writing"
+  image={WRITING_OG_IMAGE}
   jsonLd={[pageLd, listLd, crumbs]}
 >
   <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Writing' }]} />

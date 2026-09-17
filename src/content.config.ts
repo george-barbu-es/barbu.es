@@ -16,6 +16,12 @@ const writing = defineCollection({
     updatedDate: z.coerce.date().optional(),
     cornerstone: z.boolean().default(false),
     draft: z.boolean().default(false),
+    /**
+     * Optional social / Open Graph image.
+     * Absolute URL or site path (e.g. `/og/writing/my-slug.jpg`).
+     * If omitted, uses `public/og/writing/{slug}.jpg` when present, else `/og/writing.jpg`.
+     */
+    image: z.string().optional(),
   }),
 });
 
