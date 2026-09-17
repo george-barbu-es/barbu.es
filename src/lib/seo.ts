@@ -21,7 +21,7 @@ export type ResolvedOgImage = {
 
 /** Site-wide social share fallback (1200×630, served from /public/og). */
 export const DEFAULT_OG_IMAGE: Required<OgImageInput> = {
-  src: '/og/default.jpg',
+  src: '/og/default.png',
   width: OG_IMAGE_WIDTH,
   height: OG_IMAGE_HEIGHT,
   alt: `${site.name} - Knowledge Platform`,
@@ -29,7 +29,7 @@ export const DEFAULT_OG_IMAGE: Required<OgImageInput> = {
 
 /** Writing share fallback when an article has no dedicated OG image. */
 export const WRITING_OG_IMAGE: Required<OgImageInput> = {
-  src: '/og/writing.jpg',
+  src: '/og/writing.png',
   width: OG_IMAGE_WIDTH,
   height: OG_IMAGE_HEIGHT,
   alt: `Writing on ${site.name}`,
@@ -108,7 +108,7 @@ export function resolveUrl(path = '/'): string {
 
 /** Convention path for a writing article OG image in `/public/og/writing/`. */
 export function writingOgImagePath(slug: string): string {
-  return `/og/writing/${slug}.jpg`;
+  return `/og/writing/${slug}.png`;
 }
 
 export function resolveOgImage(

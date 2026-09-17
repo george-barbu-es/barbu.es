@@ -18,8 +18,8 @@ const writing = defineCollection({
     draft: z.boolean().default(false),
     /**
      * Optional social / Open Graph image.
-     * Absolute URL or site path (e.g. `/og/writing/my-slug.jpg`).
-     * If omitted, uses `public/og/writing/{slug}.jpg` when present, else `/og/writing.jpg`.
+     * Absolute URL or site path (e.g. `/og/writing/my-slug.png`).
+     * If omitted, uses `public/og/writing/{slug}.png` when present, else `/og/writing.png`.
      */
     image: z.string().optional(),
   }),
