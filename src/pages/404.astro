@@ -1,0 +1,44 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/Button.astro';
+---
+
+<BaseLayout
+  title="404"
+  description="This page does not exist on barbu.es."
+  path="/404"
+  noindex={true}
+>
+  <header class="page-header not-found">
+    <p class="not-found__code" aria-hidden="true">404</p>
+    <h1>Page not found</h1>
+    <p>
+      This URL is not part of the Knowledge Platform. It may have been moved, mistyped, or never
+      published.
+    </p>
+  </header>
+
+  <div class="not-found__actions">
+    <Button href="/" variant="primary">Home</Button>
+    <Button href="/writing/" variant="secondary">Writing</Button>
+    <Button href="/contact/" variant="text">Contact</Button>
+  </div>
+</BaseLayout>
+
+<style>
+  .not-found__code {
+    margin: 0 0 var(--space-3);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    letter-spacing: 0.04em;
+    color: var(--color-muted);
+  }
+
+  .not-found__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-8);
+  }
+</style>
