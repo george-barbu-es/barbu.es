@@ -10,6 +10,7 @@ import {
   buildBreadcrumbJsonLd,
   buildWebPageJsonLd,
 } from '../../lib/schema/jsonld';
+import { person } from '../../config/person';
 import {
   resolveUrl,
   WRITING_OG_IMAGE,
@@ -84,6 +85,9 @@ const crumbs = buildBreadcrumbJsonLd([
   path={`/writing/${entry.id}`}
   type="article"
   image={ogImage}
+  publishedTime={entry.data.pubDate}
+  modifiedTime={entry.data.updatedDate ?? entry.data.pubDate}
+  authorName={person.name}
   noindex={entry.data.draft}
   jsonLd={[pageLd, articleLd, crumbs]}
 >

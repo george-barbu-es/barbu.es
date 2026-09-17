@@ -46,6 +46,16 @@ export type SeoProps = {
   imageAlt?: string;
   type?: 'website' | 'article' | 'profile';
   noindex?: boolean;
+  /**
+   * Article Open Graph fields (LinkedIn Post Inspector reads these).
+   * Only emitted when `type` is `article`.
+   */
+  publishedTime?: string | Date;
+  modifiedTime?: string | Date;
+  /** Display name for `article:author` / `<meta name="author">`. */
+  authorName?: string;
+  /** Optional profile URL also emitted as `article:author`. */
+  authorUrl?: string;
 };
 
 /**
@@ -132,6 +142,13 @@ export function resolveOgImage(
   };
 }
 
+function toIsoDatetime(value?: string | Date): string | undefined {
+  if (!value) return undefined;
+  if (value instanceof Date) return value.toISOString();
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed.toISOString();
+}
+
 export function buildSeo(props: SeoProps = {}) {
   const pageTitle = props.title ?? site.name;
   const documentTitle =
@@ -143,6 +160,8 @@ export function buildSeo(props: SeoProps = {}) {
   const canonical = resolveUrl(props.path ?? '/');
   const ogImage = resolveOgImage(props.image, DEFAULT_OG_IMAGE, props.imageAlt);
   const ogType = props.type ?? 'website';
+  const publishedTime = toIsoDatetime(props.publishedTime);
+  const modifiedTime = toIsoDatetime(props.modifiedTime) ?? publishedTime;
 
   return {
     title: documentTitle,
@@ -153,5 +172,9 @@ export function buildSeo(props: SeoProps = {}) {
     ogType,
     noindex: props.noindex ?? false,
     twitterCard: 'summary_large_image' as const,
+    publishedTime: ogType === 'article' ? publishedTime : undefined,
+    modifiedTime: ogType === 'article' ? modifiedTime : undefined,
+    authorName: ogType === 'article' ? props.authorName : undefined,
+    authorUrl: ogType === 'article' ? props.authorUrl : undefined,
   };
 }
